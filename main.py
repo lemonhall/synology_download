@@ -6,6 +6,8 @@ import os
 from pydantic import BaseModel
 from threading import Timer
 import signal
+from datetime import datetime
+from dateutil import tz, zoneinfo
 
 
 app = FastAPI()
@@ -35,8 +37,12 @@ def relogin():
 
 # target task function
 def task(message):
-    # report the custom message
-    print(message)
+    tz_sh = tz.gettz('Asia/Shanghai')
+    # datetime object containing current date and time
+    now = datetime.now(tz=tz_sh)
+    # dd/mm/YY H:M:S
+    dt_string = now.strftime("%Y-%m-%d %H:%M:%S")
+    print(dt_string+"  : "+message)
     relogin()
 
 class RepeatTimer(Timer):
@@ -44,7 +50,7 @@ class RepeatTimer(Timer):
         while not self.finished.wait(self.interval):
             self.function(*self.args, **self.kwargs)
 
-timer = RepeatTimer(60, task,args=('I am refersh login auth',))
+timer = RepeatTimer(600, task,args=('I am refersh login auth',))
 timer.start()
 
 def handler(signum, frame):

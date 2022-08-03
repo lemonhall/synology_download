@@ -83,9 +83,6 @@ sudo docker run -it lemonhall/synology_downloader bash
 http://[240e:3b4:303c:d970:1000:242:ac10:c803]:8000/
 240e:3b4:303c:d970:1000:242:ac10:c803
 
-synology-downloader.lemonhall.me
-
-http://synology-downloader.lemonhall.me:8000/
 
 ok，这样就可以了
 
@@ -147,5 +144,12 @@ docker run -d lemonhall/synology_downloader bash -c 'cd /root/synology_download;
 ========
 
 https://stackoverflow.com/questions/42800590/tampermonkey-right-click-menu
+
+'bash' '-c' 'cd /root/synology_download;source ~/.venvs/synology_download/bin/activate;uvicorn main:app --host ::'
+
+
+source ~/.venvs/synology_download/bin/activate;
+pip3 install python-dateutil
+
 
 
