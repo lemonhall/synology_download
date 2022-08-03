@@ -14,6 +14,7 @@ https://github.com/N4S4/synology-api
 pip install fastapi
 pip install "uvicorn[standard]"
 pip install python-multipart
+pip3 install python-dateutil
 
 官方地址
 
@@ -27,41 +28,47 @@ pip install python-multipart
 	dwn.get_info()
 
 4. 开始制作镜像
-sudo docker run -it lemonhall/xdp_demo bash
 
-dnf update
-一下
+	sudo docker run -it lemonhall/xdp_demo bash
 
-mkdir ~/.venvs
-mkdir ~/.venvs/synology_download
+	dnf update
 
-python3 -m venv ~/.venvs/synology_download
-source ~/.venvs/synology_download/bin/activate
+	mkdir ~/.venvs
+	mkdir ~/.venvs/synology_download
 
-mkdir synology_download
-cd mkdir synology_download
+	python3 -m venv ~/.venvs/synology_download
+	source ~/.venvs/synology_download/bin/activate
 
-/root/.venvs/synology_download/bin/python3 -m pip install --upgrade pip
+	mkdir synology_download
+	cd mkdir synology_download
 
-pip3 install synology-api
-pip install fastapi
-pip install "uvicorn[standard]"
-pip install python-multipart
+	/root/.venvs/synology_download/bin/python3 -m pip install --upgrade pip
+
+	pip3 install synology-api
+	pip install fastapi
+	pip install "uvicorn[standard]"
+	pip install python-multipart
+	pip3 install python-dateutil
 
 太慢了
-pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+
+	pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
 配置清华源
 
 参考它的写法：
-docker run --rm -v `pwd`:/project mingc/android-build-box bash -c 'cd /project; ./gradlew build'
+
+	docker run --rm -v `pwd`:/project mingc/android-build-box bash -c 'cd /project; ./gradlew build'
 
 启动就是干三件事：
-cd /root/synology_download;
-source ~/.venvs/synology_download/bin/activate;
-uvicorn main:app --host 0.0.0.0
+
+	cd /root/synology_download;
+	source ~/.venvs/synology_download/bin/activate;
+	uvicorn main:app --host 0.0.0.0
+
 这只监听的是v4
-uvicorn main:app --host ::
+
+	uvicorn main:app --host ::
 
 脚本头部记得
 #!/root/.venvs/synology_download/bin/python
@@ -69,34 +76,35 @@ uvicorn main:app --host ::
 
 ### 试试
 
-sudo docker ps
+	sudo docker ps
 
-sudo docker commit -m "synology_downloader" -a "lemonhall" 029417ababbd lemonhall/synology_downloader
+	sudo docker commit -m "synology_downloader" -a "lemonhall" 029417ababbd lemonhall/synology_downloader
 
-sudo docker push lemonhall/synology_downloader
+	sudo docker push lemonhall/synology_downloader
 
-sudo docker run -it lemonhall/synology_downloader bash
+	sudo docker run -it lemonhall/synology_downloader bash
 
 
 ### 看了一眼ipv6的地址
-240e:3b4:303c:d970:3948:f89e:1892:19a1
-http://[240e:3b4:303c:d970:1000:242:ac10:c803]:8000/
-240e:3b4:303c:d970:1000:242:ac10:c803
+	240e:3b4:303c:d970:3948:f89e:1892:19a1
+	http://[240e:3b4:303c:d970:1000:242:ac10:c803]:8000/
+	240e:3b4:303c:d970:1000:242:ac10:c803
 
 
 ok，这样就可以了
 
 
 ### 启动
-sudo docker start synology_downloader bash -c 'cd /root/synology_download;source ~/.venvs/synology_download/bin/activate;uvicorn main:app --host ::'
+	sudo docker start synology_downloader bash -c 'cd /root/synology_download;source ~/.venvs/synology_download/bin/activate;uvicorn main:app --host ::'
 
 
 ### 关于传参
-application/json
+	application/json
 
-{"url":"magnet:?xxxxx"}
+	{"url":"magnet:?xxxxx"}
 
 修改了一下源码：
+
 	class Task(BaseModel):
 	    url: str
 
@@ -111,7 +119,7 @@ FastAPI可以帮你自动解析
 
 ### 最终的启动参数，记得要重命名一下这个容器哈
 
-docker run -d lemonhall/synology_downloader bash -c 'cd /root/synology_download;source ~/.venvs/synology_download/bin/activate;uvicorn main:app --host ::'
+	docker run -d lemonhall/synology_downloader bash -c 'cd /root/synology_download;source ~/.venvs/synology_download/bin/activate;uvicorn main:app --host ::'
 
 
 性能问题
@@ -145,11 +153,23 @@ docker run -d lemonhall/synology_downloader bash -c 'cd /root/synology_download;
 
 https://stackoverflow.com/questions/42800590/tampermonkey-right-click-menu
 
-'bash' '-c' 'cd /root/synology_download;source ~/.venvs/synology_download/bin/activate;uvicorn main:app --host ::'
 
+时区问题
+======
+	from datetime import datetime
+	from dateutil import tz, zoneinfo
 
-source ~/.venvs/synology_download/bin/activate;
-pip3 install python-dateutil
+    tz_sh = tz.gettz('Asia/Shanghai')
+    # datetime object containing current date and time
+    now = datetime.now(tz=tz_sh)
+    # dd/mm/YY H:M:S
+    dt_string = now.strftime("%Y-%m-%d %H:%M:%S")
+    print(dt_string+"  : "+message)
+
+启动参数
+======
+
+	'bash' '-c' 'cd /root/synology_download;source ~/.venvs/synology_download/bin/activate;uvicorn main:app --host ::'
 
 
 
